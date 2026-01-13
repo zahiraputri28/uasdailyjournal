@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 02, 2026 at 09:08 AM
+-- Generation Time: Jan 13, 2026 at 03:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -55,20 +55,23 @@ INSERT INTO `article` (`id`, `judul`, `isi`, `gambar`, `tanggal`, `username`) VA
 
 CREATE TABLE `gallery` (
   `id` int(11) NOT NULL,
+  `judul` text DEFAULT NULL,
+  `isi` text DEFAULT NULL,
   `gambar` text DEFAULT NULL,
-  `username` varchar(50) DEFAULT NULL
+  `username` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `gallery`
 --
 
-INSERT INTO `gallery` (`id`, `gambar`, `username`) VALUES
-(1, 'gal1.jpg', 'admin'),
-(2, 'gal2.jpg', 'admin'),
-(3, 'gal3.jpg', 'admin'),
-(4, 'gal4.jpg', 'admin'),
-(5, 'gal5.jpg', 'admin');
+INSERT INTO `gallery` (`id`, `judul`, `isi`, `gambar`, `username`) VALUES
+(1, 'Alam', 'Pemandangan Danau', 'gal1.jpg', 'admin'),
+(2, 'Berenang', 'Tempat Berenang', 'gal2.jpg', 'admin'),
+(3, 'Pemandangan', 'Pemandangan disaat jogging', 'gal3.jpg', 'admin'),
+(4, 'Main', 'Kereta gantung', 'gal4.jpg', 'admin'),
+(5, 'Makan', 'Makan siang ', 'gal5.jpg', 'admin'),
+(6, 'Me', 'Fotoku', 'gal6.jpg', 'admin');
 
 -- --------------------------------------------------------
 
@@ -78,9 +81,9 @@ INSERT INTO `gallery` (`id`, `gambar`, `username`) VALUES
 
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,
-  `username` varchar(60) NOT NULL,
-  `password` text NOT NULL,
-  `foto` text NOT NULL
+  `username` varchar(30) NOT NULL,
+  `password` varchar(30) NOT NULL,
+  `foto` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
@@ -88,7 +91,12 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `username`, `password`, `foto`) VALUES
-(1, 'admin', 'e10adc3949ba59abbe56e057f20f883e', '');
+(1, 'admin', '123456', 'user1.jpg'),
+(2, 'danny', 'admin', 'user2.jpg'),
+(3, 'sandra', '135790', 'user3.jpg'),
+(4, 'kenzo', 'kenzo04', 'user4.jpg'),
+(5, 'keyla', 'keyylaa', 'user5.jpg'),
+(6, 'Adit', 'adit6', 'user6.jpg');
 
 --
 -- Indexes for dumped tables
@@ -126,13 +134,13 @@ ALTER TABLE `article`
 -- AUTO_INCREMENT for table `gallery`
 --
 ALTER TABLE `gallery`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
