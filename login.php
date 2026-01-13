@@ -1,9 +1,8 @@
 <?php
-// 1. HARUS ADA SESSION START DI PALING ATAS
+
 session_start();
 include "koneksi.php";
 
-// Jika sudah login, langsung lempar ke admin
 if (isset($_SESSION['username'])) { 
     header("location:admin.php"); 
     exit;
@@ -14,22 +13,18 @@ $error_message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userInput = $_POST['user'];
     $passInput = $_POST['pass'];
-    $password_md5 = md5($passInput); // Untuk cek ke database
 
-    // 2. CEK KE DATABASE (Sesuai struktur yang kamu mau sebelumnya)
     $stmt = $conn->prepare("SELECT username FROM user WHERE username=? AND password=?");
-    $stmt->bind_param("ss", $userInput, $password_md5);
+    $stmt->bind_param("ss", $userInput, $passInput);
     $stmt->execute();
     $hasil = $stmt->get_result();
     $row = $hasil->fetch_array(MYSQLI_ASSOC);
 
     if (!empty($row)) {
-        // JIKA BERHASIL: Buat Session dan Pindah Halaman
         $_SESSION['username'] = $row['username'];
         header("location:admin.php");
         exit;
     } else {
-        // JIKA GAGAL: Buat pesan error untuk ditampilkan di bawah
         $error_message = '
         <div class="row mt-3">
             <div class="col-12 col-sm-6 col-md-4 m-auto">

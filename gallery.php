@@ -1,51 +1,120 @@
 <div class="container">
-    <h2 class="mb-4">Manajemen Gallery</h2>
 
-    <a href="admin.php?page=gallery&action=tambah" class="btn btn-primary mb-3"><i class="bi bi-plus-square"></i> Tambah Gambar</a>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalTambah">
+        <i class="bi bi-plus-lg"></i> Tambah Gallery
+    </button>
 
     <div class="row">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>No</th>
-                        <th>Gambar</th>
-                        <th>Username</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $sql = "SELECT * FROM gallery ORDER BY id DESC"; 
-                    $hasil = $conn->query($sql);
+        <div class="table-responsive" id="gallery_content">
+            </div>
+    </div>
+</div>
 
-                    $no = 1;
-                    while ($row = $hasil->fetch_assoc()) {
-                    ?>
-                        <tr>
-                            <td><?= $no++ ?></td>
-                            <td>
-                                <?php
-                                if ($row["gambar"] != '' && file_exists('img/' . $row["gambar"])) {
-                                ?>
-                                    <img src="img/<?= $row["gambar"] ?>" width="100">
-                                <?php
-                                } else {
-                                    echo "No Image";
-                                }
-                                ?>
-                            </td>
-                            <td><?= $row["username"] ?></td>
-                            <td>
-                                <a href="admin.php?page=gallery&action=edit&id=<?= $row['id'] ?>" class="btn btn-warning btn-sm">Edit</a>
-                                <a href="admin.php?page=gallery&action=hapus&id=<?= $row['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus gambar ini?')">Hapus</a>
-                            </td>
-                        </tr>
-                    <?php
-                    }
-                    ?>
-                </tbody>
-            </table>
+<!-- Awal Modal Tambah-->
+<div class="modal fade" id="modalTambah" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Tambah Gallery</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <div class="modal-body text-start">
+                    <div class="mb-3">
+                        <label class="form-label">Judul</label>
+                        <input type="text" class="form-control" name="judul" placeholder="Tuliskan Judul Gambar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Isi</label>
+                        <textarea class="form-control" name="isi" placeholder="Tuliskan Deskripsi Gambar" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Gambar</label>
+                        <input type="file" class="form-control" name="gambar" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <input type="submit" value="simpan" name="simpan" class="btn btn-primary">
+                </div>
+            </form>
         </div>
     </div>
 </div>
+<!-- Akhir Modal Tambah-->
+
+<script>
+$(document).ready(function(){
+    load_data();
+
+    function load_data(hlm){
+        $.ajax({
+            url : "gallery_data.php",
+            method : "POST",
+            data : { hlm: hlm },
+            success : function(data){
+                $('#gallery_content').html(data);
+            }
+        })
+    }
+
+    $(document).on('click', '.halaman', function(){
+        var hlm = $(this).attr("id");
+        load_data(hlm);
+    });
+});
+</script>
+
+<?php
+include "upload_foto.php";
+
+if (isset($_POST['simpan'])) {
+    $judul = $_POST['judul'];
+    $isi = $_POST['isi'];
+    $username = $_SESSION['username'];
+    $gambar = '';
+    $nama_gambar = $_FILES['gambar']['name'];
+
+    if ($nama_gambar != '') {
+        $cek_upload = upload_foto($_FILES["gambar"]);
+        if ($cek_upload['status']) {
+            $gambar = $cek_upload['message'];
+        } else {
+            echo "<script>alert('" . $cek_upload['message'] . "'); document.location='admin.php?page=gallery';</script>";
+            die;
+        }
+    }
+
+    if (isset($_POST['id'])) {
+        $id = $_POST['id'];
+        if ($nama_gambar == '') {
+            $gambar = $_POST['gambar_lama'];
+        } else {
+            if (file_exists("img/" . $_POST['gambar_lama'])) { unlink("img/" . $_POST['gambar_lama']); }
+        }
+        $stmt = $conn->prepare("UPDATE gallery SET judul=?, isi=?, gambar=?, username=? WHERE id=?");
+        $stmt->bind_param("ssssi", $judul, $isi, $gambar, $username, $id);
+    } else {
+        $stmt = $conn->prepare("INSERT INTO gallery (judul, isi, gambar, username) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $judul, $isi, $gambar, $username);
+    }
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Simpan Sukses'); document.location='admin.php?page=gallery';</script>";
+    }
+    $stmt->close();
+}
+
+if (isset($_POST['hapus'])) {
+    $id = $_POST['id'];
+    $gambar = $_POST['gambar'];
+    if ($gambar != '' && file_exists("img/" . $gambar)) { unlink("img/" . $gambar); }
+    $stmt = $conn->prepare("DELETE FROM gallery WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
+        echo "<script>alert('Hapus Sukses'); document.location='admin.php?page=gallery';</script>";
+    }
+    $stmt->close();
+}
+?>
